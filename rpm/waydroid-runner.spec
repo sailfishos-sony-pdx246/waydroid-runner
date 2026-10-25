@@ -5,7 +5,7 @@ Name:       waydroid-runner
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    Waydroid session wrapper
-Version:    0.5.0
+Version:    0.6.0
 Release:    1
 Group:      Qt/Qt
 License:    BSD-3
@@ -15,6 +15,8 @@ Requires:   sailfishsilica-qt5 >= 0.10.9
 Requires:   waydroid
 # invoker and booster-generic start the background instance
 Requires:   mapplauncherd
+# Settings > Apps > Waydroid
+Requires:   nemo-qml-plugin-configuration-qt5
 BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Qml)
@@ -22,12 +24,14 @@ BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  pkgconfig(Qt5Compositor) >= 5.6.0
 BuildRequires:  pkgconfig(Qt5Svg)
 BuildRequires:  pkgconfig(Qt5DBus)
+BuildRequires:  pkgconfig(mlite5)
 BuildRequires:  qt5-qttools-linguist
 
 %description
 Wrapper for running Waydroid session on Sailfish. Closing its window
 keeps Android running in the background; the launcher shows it again.
 Android apps' launchers and notification taps open them in its window.
+Settings > Apps > Waydroid sets whether closing the window stops Android.
 
 PackageName: Waydroid Runner
 Type: desktop-application
@@ -66,3 +70,5 @@ desktop-file-install --delete-original       \
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 %{_prefix}/lib/systemd/user/%{name}.service
 %{_datadir}/dbus-1/services/org.sailfishosopen.WaydroidRunner.service
+%{_datadir}/jolla-settings/entries/%{name}.json
+%{_datadir}/jolla-settings/pages/%{name}
