@@ -46,10 +46,13 @@
 #include <QQuickItem>
 #include <QQuickView>
 
+#include <MDConfItem>
+
 #include <iostream>
 
 const QString Service::name = QStringLiteral("org.sailfishosopen.WaydroidRunner");
 const QString Service::path = QStringLiteral("/org/sailfishosopen/WaydroidRunner");
+const QString Service::closeActionKey = QStringLiteral("/apps/waydroid-runner/close_action");
 
 Service::Service(QQuickView *view, Runner *runner, QObject *parent):
   QObject(parent),
@@ -60,6 +63,9 @@ Service::Service(QQuickView *view, Runner *runner, QObject *parent):
   connect(m_runner, &Runner::statusChanged, this, &Service::onStatusChanged);
   connect(m_runner, &Runner::exit, this, &Service::onSessionFinished);
   m_view->installEventFilter(this);
+
+  m_close_action = new MDConfItem(closeActionKey, this);
+  connect(m_close_action, &MDConfItem::valueChanged, this, &Service::onCloseActionChanged);
 }
 
 QString Service::state() const
@@ -154,6 +160,8 @@ bool Service::eventFilter(QObject *object, QEvent *event)
       // Closed while Android does not run: nothing to keep
       if (!m_runner->sessionActive())
         qApp->quit();
+      else if (stopOnClose())
+        m_runner->stopSession();
     }
   return QObject::eventFilter(object, event);
 }
@@ -163,4 +171,18 @@ void Service::onSessionFinished()
   // Nothing left to run in the background
   if (!m_open)
     qApp->quit();
+}
+
+bool Service::stopOnClose() const
+{
+  return m_close_action->value().toString() == QLatin1String("stop");
+}
+
+void Service::onCloseActionChanged()
+{
+  // Set to "stop" while Android runs with the window closed: as if it had
+  // been closed now. Not at the start: a hidden start (-prestart) has not
+  // been closed.
+  if (stopOnClose() && !m_open && m_runner->sessionActive())
+    m_runner->stopSession();
 }

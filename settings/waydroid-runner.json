@@ -1,0 +1,12 @@
+{
+    "entries": [
+        {
+            "path": "applications/waydroid-runner.desktop",
+            "title": "Waydroid",
+            "type": "application",
+            "params": {
+                "source": "/usr/share/jolla-settings/pages/waydroid-runner/WaydroidSettings.qml"
+            }
+        }
+    ]
+}

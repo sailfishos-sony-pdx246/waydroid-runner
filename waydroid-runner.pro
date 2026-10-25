@@ -31,6 +31,12 @@ QT += dbus
 
 QT += compositor
 
+# MDConfItem: the setting that Settings > Apps > Waydroid writes. No
+# CONFIG += link_pkgconfig here: sailfishapp.prf adds it together with its
+# own PKGCONFIG, which an earlier link_pkgconfig would miss (no
+# -lsailfishapp)
+PKGCONFIG += mlite5
+
 SOURCES += \
     src/main.cpp \
     src/qmlcompositor.cpp \
@@ -42,6 +48,8 @@ OTHER_FILES += \
     qml/MainPage.qml \
     qml/CoverPage.qml \
     qml/WindowContainer.qml \
+    settings/$${TARGET}.json \
+    settings/WaydroidSettings.qml \
 
 DISTFILES += \
     rpm/waydroid-runner.spec
@@ -61,6 +69,13 @@ systemd.path = $$PREFIX/lib/systemd/user
 dbus_service.files = dbus/org.sailfishosopen.WaydroidRunner.service
 dbus_service.path = $$PREFIX/share/dbus-1/services
 INSTALLS += systemd dbus_service
+
+# Settings > Apps > Waydroid
+settings_entry.files = settings/$${TARGET}.json
+settings_entry.path = $$PREFIX/share/jolla-settings/entries
+settings_page.files = settings/WaydroidSettings.qml
+settings_page.path = $$PREFIX/share/jolla-settings/pages/$${TARGET}
+INSTALLS += settings_entry settings_page
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172 256x256 512x512
 DISTFILES += $${TARGET}.desktop

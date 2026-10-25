@@ -22,6 +22,19 @@ and the window is closed.
 - To start Android at login as well:
   `systemctl --user enable waydroid-runner`.
 
+Settings > Apps > Waydroid has the setting *Closing the window*: it keeps
+Android running (the default) or stops Android, as the original runner
+did. It is the dconf key `/apps/waydroid-runner/close_action`
+(`keep-running` or `stop`); a running instance follows a change at once,
+so setting `stop` while the window is closed stops Android. Moving the
+window to the app switcher, or the display turning off, does not close
+it.
+
+Pausing Android while its window is hidden (`waydroid container freeze`)
+is not offered: Android's alarm timers are watched with `EPOLLWAKEUP`, so
+a frozen Android holds a `[timerfd]` wakeup source from its next alarm
+on, and the phone cannot suspend until it is thawed.
+
 ## Android apps
 
 The port's Waydroid package writes a launcher for each Android app
@@ -43,7 +56,7 @@ D-Bus interface on the session bus: service and interface
 | `activateWindow(as)` | Launcher entry point: without arguments `Show()`, with an Android app's package first `Launch(package)` |
 | `Launch(s)` | Open the Android app with this package (once Android's UI is up) and show the window |
 | `Show()` | Show the window; start Android if it does not run |
-| `Hide()` | Close the window, as the user would; Android keeps running |
+| `Hide()` | Close the window, as the user would; Android keeps running unless the setting is `stop` |
 | `Stop()` | Stop the Android session |
 | `State` (s) | `stopped`, `starting`, `running`, `stopping` or `error`; signal `StateChanged(s)` |
 | `Open` (b) | Whether the window is open, on screen or in the app switcher; signal `OpenChanged(b)` |

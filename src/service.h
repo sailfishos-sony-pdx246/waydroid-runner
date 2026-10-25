@@ -42,6 +42,7 @@
 #include <QString>
 #include <QStringList>
 
+class MDConfItem;
 class QQuickView;
 class Runner;
 
@@ -49,8 +50,9 @@ class Runner;
 // the Waydroid icon and the Android apps' icons), a tap on an Android
 // notification (Lipstick's remote action), a second start of the program and
 // scripts reach the instance through it.
-// Closing the window does not end Android; the instance quits once the
-// session has ended and the window is closed.
+// Closing the window keeps Android running, unless the setting closeActionKey
+// (Settings > Apps > Waydroid) is "stop"; the instance quits once the session
+// has ended and the window is closed.
 //
 // "Open" is not QWindow's visibility: Lipstick hides the main window of an
 // application with a cover whenever it is not on screen (in the app switcher,
@@ -67,6 +69,9 @@ class Service : public QObject
 public:
   static const QString name;
   static const QString path;
+  // dconf key: what closing the window does, "keep-running" (also when
+  // unset) or "stop"
+  static const QString closeActionKey;
 
   Service(QQuickView *view, Runner *runner, QObject *parent=nullptr);
 
@@ -85,7 +90,8 @@ public slots:
   Q_SCRIPTABLE void Launch(const QString &package);
   // Show the window; starts Android if it does not run
   Q_SCRIPTABLE void Show();
-  // As if the user closed the window: Android keeps running
+  // As if the user closed the window: Android keeps running, unless the
+  // setting is "stop"
   Q_SCRIPTABLE void Hide();
   Q_SCRIPTABLE void Stop();
 
@@ -97,10 +103,13 @@ protected:
   bool eventFilter(QObject *object, QEvent *event) override;
   void onStatusChanged();
   void onSessionFinished();
+  void onCloseActionChanged();
+  bool stopOnClose() const;
 
 protected:
   QQuickView *m_view;
   Runner     *m_runner;
+  MDConfItem *m_close_action;
   QString     m_state;
   bool        m_open{false};
 };
