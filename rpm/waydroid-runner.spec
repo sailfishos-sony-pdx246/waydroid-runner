@@ -5,7 +5,7 @@ Name:       waydroid-runner
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    Waydroid session wrapper
-Version:    0.4.0
+Version:    0.5.0
 Release:    1
 Group:      Qt/Qt
 License:    BSD-3
@@ -27,6 +27,7 @@ BuildRequires:  qt5-qttools-linguist
 %description
 Wrapper for running Waydroid session on Sailfish. Closing its window
 keeps Android running in the background; the launcher shows it again.
+Android apps' launchers and notification taps open them in its window.
 
 PackageName: Waydroid Runner
 Type: desktop-application
