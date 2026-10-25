@@ -22,14 +22,27 @@ and the window is closed.
 - To start Android at login as well:
   `systemctl --user enable waydroid-runner`.
 
+## Android apps
+
+The port's Waydroid package writes a launcher for each Android app
+(`~/.local/share/applications/waydroid.<package>.desktop`) that calls
+`activateWindow` with the app's package (`X-Maemo-Fixed-Args`, no
+`Exec`): the runner starts Android if needed, opens the app with
+`waydroid app launch` once Android's UI is up, and shows its window.
+Its `app launch` keeps the full UI while it is shown, so the app opens
+in the runner's window. A tap on an Android notification calls `Show()`
+(Lipstick's remote action `x-nemo-remote-action-default`), while Android
+opens the notification's target.
+
 D-Bus interface on the session bus: service and interface
 `org.sailfishosopen.WaydroidRunner`, object
 `/org/sailfishosopen/WaydroidRunner`.
 
 | Member | |
 |---|---|
-| `activateWindow(as)` | Start Android if it does not run, show the window (launcher entry point; the arguments are unused) |
-| `Show()` | Show the window |
+| `activateWindow(as)` | Launcher entry point: without arguments `Show()`, with an Android app's package first `Launch(package)` |
+| `Launch(s)` | Open the Android app with this package (once Android's UI is up) and show the window |
+| `Show()` | Show the window; start Android if it does not run |
 | `Hide()` | Close the window, as the user would; Android keeps running |
 | `Stop()` | Stop the Android session |
 | `State` (s) | `stopped`, `starting`, `running`, `stopping` or `error`; signal `StateChanged(s)` |

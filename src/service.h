@@ -45,8 +45,10 @@
 class QQuickView;
 class Runner;
 
-// D-Bus interface of the running instance. The launcher (X-Maemo-Method),
-// a second start of the program and scripts reach the instance through it.
+// D-Bus interface of the running instance. The launchers (X-Maemo-Method:
+// the Waydroid icon and the Android apps' icons), a tap on an Android
+// notification (Lipstick's remote action), a second start of the program and
+// scripts reach the instance through it.
 // Closing the window does not end Android; the instance quits once the
 // session has ended and the window is closed.
 //
@@ -75,9 +77,13 @@ public:
   static bool activateInstance();
 
 public slots:
-  // Launcher entry point: starts Android if it does not run and shows the
-  // window. The arguments are the URIs of the launch request (unused).
+  // Launcher entry point. The Waydroid icon calls it without arguments:
+  // Show(). An Android app's launcher passes the app's package first
+  // (X-Maemo-Fixed-Args): Launch(package).
   Q_SCRIPTABLE void activateWindow(const QStringList &args);
+  // Open an Android app in the window, and show it
+  Q_SCRIPTABLE void Launch(const QString &package);
+  // Show the window; starts Android if it does not run
   Q_SCRIPTABLE void Show();
   // As if the user closed the window: Android keeps running
   Q_SCRIPTABLE void Hide();

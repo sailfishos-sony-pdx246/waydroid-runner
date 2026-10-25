@@ -73,6 +73,10 @@ public:
   Q_INVOKABLE void start();
   Q_INVOKABLE void stopSession();
 
+  // Open an Android app in the full UI. Before Android's UI is up, the
+  // last requested app waits for it.
+  Q_INVOKABLE void launchApp(const QString &package);
+
   // the session process runs (starting, running or stopping Android)
   bool sessionActive() const;
 
@@ -95,15 +99,21 @@ protected:
   void onError(QProcess::ProcessError error);
   void onFinished(int /*exitCode*/, QProcess::ExitStatus exitStatus);
   void onStopFinished();
+  void onFullUIFinished();
   void onCheckSession();
   void onStdOut();
   void onStdErr();
+  void launchPendingApp();
 
 protected:
   QProcess   *m_process_session{nullptr};
   QProcess   *m_process_fullui{nullptr};
   QProcess   *m_process_stop{nullptr};
+  QProcess   *m_process_launch{nullptr};
   QString     m_wayland_socket;
+  QString     m_pending_app;
+  // show-full-ui has finished: Android's platform service answers
+  bool        m_ui_ready{false};
 
   QString     m_status;
   Status      m_status_code = Status::Idle;

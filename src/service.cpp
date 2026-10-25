@@ -93,16 +93,26 @@ bool Service::activateInstance()
   return true;
 }
 
-void Service::activateWindow(const QStringList &/*args*/)
+void Service::activateWindow(const QStringList &args)
 {
-  // Android has stopped or ended since the instance started: start it again
-  if (!m_runner->sessionActive())
-    m_runner->start();
+  if (!args.isEmpty() && !args.first().isEmpty())
+    Launch(args.first());
+  else
+    Show();
+}
+
+void Service::Launch(const QString &package)
+{
+  m_runner->launchApp(package);
   Show();
 }
 
 void Service::Show()
 {
+  // Android has stopped or ended since the instance started: start it again
+  if (!m_runner->sessionActive())
+    m_runner->start();
+
   // Silica's ApplicationWindow shows the window full screen and raises it
   QQuickItem *window = m_view->rootObject();
   if (!window || !QMetaObject::invokeMethod(window, "activate"))

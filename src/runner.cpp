@@ -75,6 +75,8 @@ Runner::Runner(QString wayland_socket, QObject *parent):
 
   connect(m_process_fullui, &QProcess::readyReadStandardError, this, &Runner::onStdErr);
   connect(m_process_fullui, &QProcess::readyReadStandardOutput, this, &Runner::onStdOut);
+  connect(m_process_fullui, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
+          this, &Runner::onFullUIFinished);
 
   // "waydroid session stop" in a process of its own: m_process_session may
   // be the running session
@@ -84,6 +86,15 @@ Runner::Runner(QString wayland_socket, QObject *parent):
   connect(m_process_stop, &QProcess::readyReadStandardOutput, this, &Runner::onStdOut);
   connect(m_process_stop, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
           this, &Runner::onStopFinished);
+
+  // "waydroid app launch", one at a time
+  m_process_launch = new QProcess(this);
+  m_process_launch->setProcessEnvironment(env);
+
+  connect(m_process_launch, &QProcess::readyReadStandardError, this, &Runner::onStdErr);
+  connect(m_process_launch, &QProcess::readyReadStandardOutput, this, &Runner::onStdOut);
+  connect(m_process_launch, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
+          this, &Runner::launchPendingApp);
 }
 
 Runner::~Runner()
@@ -122,6 +133,7 @@ void Runner::start()
       return;
     }
 
+  m_ui_ready = false;
   m_process_session->start(WAYDROID_PATH, QStringList() << "session" << "start");
   m_status = tr("Starting Android session");
   m_status_code = Status::StartingSession;
@@ -134,9 +146,28 @@ void Runner::stopSession()
     return;
 
   m_process_stop->start(WAYDROID_PATH, QStringList() << "session" << "stop");
+  m_ui_ready = false;
   m_status = tr("Stopping Android session");
   m_status_code = Status::StoppingSession;
   emit statusChanged();
+}
+
+void Runner::launchApp(const QString &package)
+{
+  m_pending_app = package;
+  launchPendingApp();
+}
+
+void Runner::launchPendingApp()
+{
+  // Only into our running session: without one, "waydroid app launch" would
+  // start a session of its own
+  if (m_pending_app.isEmpty() || !m_ui_ready || m_status_code != Status::WaitingForUI ||
+      m_process_launch->state() != QProcess::NotRunning)
+    return;
+
+  m_process_launch->start(WAYDROID_PATH, QStringList() << "app" << "launch" << m_pending_app);
+  m_pending_app.clear();
 }
 
 bool Runner::sessionActive() const
@@ -204,6 +235,9 @@ void Runner::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
   onStdErr();
   onStdOut();
 
+  m_ui_ready = false;
+  m_pending_app.clear();
+
   bool c = (exitStatus == QProcess::CrashExit);
   if (m_crashed != c)
     {
@@ -247,6 +281,19 @@ void Runner::onStopFinished()
     }
 }
 
+void Runner::onFullUIFinished()
+{
+  onStdErr();
+  onStdOut();
+
+  // show-full-ui has reached Android's platform service: apps can be opened
+  if (m_status_code == Status::WaitingForUI)
+    {
+      m_ui_ready = true;
+      launchPendingApp();
+    }
+}
+
 static void output(bool err, const char *prefix, QProcess *process)
 {
   if (!process || !process->isReadable())
@@ -270,6 +317,8 @@ void Runner::onStdErr()
     output(true, "[FullUI]", m_process_fullui);
   if (m_process_stop)
     output(true, "[Stop]", m_process_stop);
+  if (m_process_launch)
+    output(true, "[Launch]", m_process_launch);
 }
 
 void Runner::onStdOut()
@@ -280,4 +329,6 @@ void Runner::onStdOut()
     output(false, "[FullUI]", m_process_fullui);
   if (m_process_stop)
     output(false, "[Stop]", m_process_stop);
+  if (m_process_launch)
+    output(false, "[Launch]", m_process_launch);
 }
