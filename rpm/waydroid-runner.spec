@@ -5,14 +5,16 @@ Name:       waydroid-runner
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    Waydroid session wrapper
-Version:    0.3.1
+Version:    0.4.0
 Release:    1
 Group:      Qt/Qt
 License:    BSD-3
-URL:        https://github.com/sailfishos-open/waydroid-runner
+URL:        https://github.com/sailfishos-sony-pdx246/waydroid-runner
 Source0:    %{name}-%{version}.tar.bz2
 Requires:   sailfishsilica-qt5 >= 0.10.9
 Requires:   waydroid
+# invoker and booster-generic start the background instance
+Requires:   mapplauncherd
 BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Qml)
@@ -23,7 +25,8 @@ BuildRequires:  pkgconfig(Qt5DBus)
 BuildRequires:  qt5-qttools-linguist
 
 %description
-Wrapper for running Waydroid session on Sailfish.
+Wrapper for running Waydroid session on Sailfish. Closing its window
+keeps Android running in the background; the launcher shows it again.
 
 PackageName: Waydroid Runner
 Type: desktop-application
@@ -31,7 +34,7 @@ Categories:
  - System
  - Video
 Custom:
- - Repo: https://github.com/sailfishos-open/waydroid-runner
+ - Repo: https://github.com/sailfishos-sony-pdx246/waydroid-runner
 Icon: https://raw.githubusercontent.com/sailfishos-open/waydroid-runner/master/icons/256x256/waydroid-runner.png
 Screenshots:
  - https://raw.githubusercontent.com/sailfishos-open/waydroid-runner/master/screenshots/waiting-start.png
@@ -55,8 +58,10 @@ desktop-file-install --delete-original       \
 
 %files
 %defattr(-,root,root,-)
-%{_bindir}
+%license LICENSE
+%{_bindir}/%{name}
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
-%{_datadir}/%{name}/translations
+%{_prefix}/lib/systemd/user/%{name}.service
+%{_datadir}/dbus-1/services/org.sailfishosopen.WaydroidRunner.service

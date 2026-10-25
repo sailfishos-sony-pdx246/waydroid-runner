@@ -2,3 +2,12 @@
 *~
 #*#
 .#*
+
+# qmake build in the source tree (mb2)
+Makefile
+.qmake.stash
+*.o
+moc_*.cpp
+*.qm
+documentation.list
+/waydroid-runner
