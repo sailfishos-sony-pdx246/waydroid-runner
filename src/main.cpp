@@ -37,9 +37,12 @@
 **
 ****************************************************************************/
 
+#include <QDBusConnection>
+#include <QDBusConnectionInterface>
 #include <QGuiApplication>
 #include <QQmlContext>
 #include <QQuickView>
+#include <QScreen>
 #include <QStandardPaths>
 #include <QDir>
 #include <sailfishapp.h>
@@ -48,6 +51,7 @@
 
 #include "qmlcompositor.h"
 #include "runner.h"
+#include "service.h"
 
 QString getFreeWaylandSocket()
 {
@@ -69,6 +73,19 @@ int main(int argc, char *argv[])
     app->setApplicationName("waydroid-runner");
     app->setOrganizationName("waydroid-runner");
     app->setApplicationVersion(APP_VERSION);
+
+    // -prestart: start Android with the window hidden (systemd user unit,
+    // started through D-Bus activation); activateWindow shows it
+    bool prestart = app->arguments().contains(QStringLiteral("-prestart"));
+
+    // One instance owns Android's display. A second start shows its window.
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    if (bus.interface()->isServiceRegistered(Service::name))
+      return Service::activateInstance() ? 0 : 1;
+
+    // Closing the window keeps Android running: the instance quits when
+    // the session has ended and the window is closed (Service)
+    app->setQuitOnLastWindowClosed(false);
 
     qmlRegisterUncreatableType<Runner>("org.sailfishosopen", 1, 0, "Runner", "Register for enum types");
 
@@ -94,13 +111,39 @@ int main(int argc, char *argv[])
     // whether settings are allowed and misc variables
     view->rootContext()->setContextProperty("programVersion", APP_VERSION);
 
+    // D-Bus interface: the object first, so that a call queued for the name
+    // (D-Bus activation) finds it
+    Service *service = new Service(view, runner, app);
+    if (!bus.registerObject(Service::path, service, QDBusConnection::ExportScriptableContents) ||
+        !bus.registerService(Service::name))
+      {
+        std::cerr << "Cannot register the D-Bus service " << Service::name.toStdString() << "\n";
+        delete runner;
+        delete compositor;
+        return 1;
+      }
+
     view->setSource(SailfishApp::pathTo("qml/main.qml"));
-    view->create();
     QObject *firstPage = view->rootObject()->findChild<QObject*>("mainPage");
     QObject::connect(compositor, SIGNAL(windowAdded(QVariant)), firstPage, SLOT(windowAdded(QVariant)));
     QObject::connect(compositor, SIGNAL(windowResized(QVariant)), firstPage, SLOT(windowResized(QVariant)));
 
-    view->show();
+    runner->start();
+
+    if (prestart)
+      {
+        // Android sizes its display from the compositor's output, which
+        // follows the window: give both the screen's size before the
+        // window is shown
+        QSize size = app->primaryScreen()->size();
+        view->resize(size);
+        compositor->setSize(size.width(), size.height());
+      }
+    else
+      {
+        view->create();
+        view->show();
+      }
     app->processEvents();
 
     int rcode = app->exec();

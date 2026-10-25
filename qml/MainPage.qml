@@ -108,6 +108,11 @@ Page {
         }
         onStatusChanged: {
             console.log("Status: ", runner.statusCode, runner.status);
+            if (runner.statusCode == Runner.StartingSession) {
+                // started again after the session ended
+                appFinished = false;
+                busyInd.running = true;
+            }
         }
     }
 

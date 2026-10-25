@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.sailfishosopen.WaydroidRunner
+Exec=/usr/bin/false
+SystemdService=waydroid-runner.service

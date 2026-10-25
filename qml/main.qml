@@ -45,11 +45,13 @@ ApplicationWindow {
     id: app
 
     initialPage: MainPage {}
-    cover: undefined
+    cover: Qt.resolvedUrl("CoverPage.qml")
     allowedOrientations: Orientation.Portrait
     _defaultPageOrientations: allowedOrientations
 
-    Component.onCompleted: {
-        runner.start();
-    }
+    // The window closes and opens again while Android keeps running (the
+    // session is started from C++): keep the scene graph with Android's
+    // surface and the GL context in between
+    _persistentOpenGLContext: true
+    _persistentSceneGraph: true
 }

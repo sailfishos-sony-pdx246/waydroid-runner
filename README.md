@@ -1,7 +1,42 @@
 # Waydroid Runner
 
 This is a helper program for running Waydroid session on Sailfish. It
-will start new session when launched and close it on exit. 
+starts a new session when launched. The runner is the Wayland compositor
+that Android draws into, so Android lives as long as the runner does.
+
+## Background mode
+
+This fork (github.com/sailfishos-sony-pdx246/waydroid-runner) keeps
+Android running when its window is closed, so that Android's
+notifications keep arriving. The launcher shows the window again
+without booting Android. Stop Android with the action on the app's
+cover in the app switcher; the runner quits once the session has ended
+and the window is closed.
+
+- The desktop file has `X-Maemo-Service` keys: the launcher calls
+  `activateWindow` on the running instance. If none runs, D-Bus
+  activation starts the user unit `waydroid-runner.service`, which runs
+  `waydroid-runner -prestart` (window hidden) and gets the same call.
+- `waydroid-runner` from a shell shows the running instance, or runs as
+  the instance itself if there is none.
+- To start Android at login as well:
+  `systemctl --user enable waydroid-runner`.
+
+D-Bus interface on the session bus: service and interface
+`org.sailfishosopen.WaydroidRunner`, object
+`/org/sailfishosopen/WaydroidRunner`.
+
+| Member | |
+|---|---|
+| `activateWindow(as)` | Start Android if it does not run, show the window (launcher entry point; the arguments are unused) |
+| `Show()` | Show the window |
+| `Hide()` | Close the window, as the user would; Android keeps running |
+| `Stop()` | Stop the Android session |
+| `State` (s) | `stopped`, `starting`, `running`, `stopping` or `error`; signal `StateChanged(s)` |
+| `Open` (b) | Whether the window is open, on screen or in the app switcher; signal `OpenChanged(b)` |
+
+For example:
+`gdbus call --session --dest org.sailfishosopen.WaydroidRunner --object-path /org/sailfishosopen/WaydroidRunner --method org.sailfishosopen.WaydroidRunner.Hide`
 
 ## Acknowledgments
 

@@ -4,6 +4,11 @@ X-Nemo-Application-Type=no-invoker
 Icon=waydroid-runner
 Exec=waydroid-runner
 Name=Waydroid
+# The launcher calls the running instance, or starts one hidden through
+# D-Bus activation, and shows its window
+X-Maemo-Service=org.sailfishosopen.WaydroidRunner
+X-Maemo-Object-Path=/org/sailfishosopen/WaydroidRunner
+X-Maemo-Method=org.sailfishosopen.WaydroidRunner.activateWindow
 
 [X-Sailjail]
 Sandboxing=Disabled

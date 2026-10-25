@@ -34,11 +34,13 @@ QT += compositor
 SOURCES += \
     src/main.cpp \
     src/qmlcompositor.cpp \
-    src/runner.cpp
+    src/runner.cpp \
+    src/service.cpp
 
 OTHER_FILES += \
     qml/main.qml \
     qml/MainPage.qml \
+    qml/CoverPage.qml \
     qml/WindowContainer.qml \
 
 DISTFILES += \
@@ -46,11 +48,19 @@ DISTFILES += \
 
 HEADERS += \
     src/qmlcompositor.h \
-    src/runner.h
+    src/runner.h \
+    src/service.h
 
 icons.files = icons
 icons.path = $$PREFIX/share/$${TARGET}
 INSTALLS += icons
+
+# Background mode: D-Bus activation starts the user unit
+systemd.files = systemd/$${TARGET}.service
+systemd.path = $$PREFIX/lib/systemd/user
+dbus_service.files = dbus/org.sailfishosopen.WaydroidRunner.service
+dbus_service.path = $$PREFIX/share/dbus-1/services
+INSTALLS += systemd dbus_service
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172 256x256 512x512
 DISTFILES += $${TARGET}.desktop

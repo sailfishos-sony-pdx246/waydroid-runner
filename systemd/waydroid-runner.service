@@ -1,0 +1,14 @@
+[Unit]
+Description=Waydroid runner: the Android session and its window
+Requires=dbus.socket booster-generic.service lipstick.service
+After=dbus.socket booster-generic.service lipstick.service
+
+# Started through D-Bus activation (the launcher's activateWindow call). To
+# start Android at login as well: systemctl --user enable waydroid-runner
+[Service]
+Type=dbus
+BusName=org.sailfishosopen.WaydroidRunner
+ExecStart=/usr/bin/invoker --type=generic -- /usr/bin/waydroid-runner -prestart
+
+[Install]
+WantedBy=user-session.target
