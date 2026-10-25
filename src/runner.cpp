@@ -75,6 +75,15 @@ Runner::Runner(QString wayland_socket, QObject *parent):
 
   connect(m_process_fullui, &QProcess::readyReadStandardError, this, &Runner::onStdErr);
   connect(m_process_fullui, &QProcess::readyReadStandardOutput, this, &Runner::onStdOut);
+
+  // "waydroid session stop" in a process of its own: m_process_session may
+  // be the running session
+  m_process_stop = new QProcess(this);
+
+  connect(m_process_stop, &QProcess::readyReadStandardError, this, &Runner::onStdErr);
+  connect(m_process_stop, &QProcess::readyReadStandardOutput, this, &Runner::onStdOut);
+  connect(m_process_stop, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
+          this, &Runner::onStopFinished);
 }
 
 Runner::~Runner()
@@ -121,10 +130,18 @@ void Runner::start()
 
 void Runner::stopSession()
 {
-  m_process_session->start(WAYDROID_PATH, QStringList() << "session" << "stop");
+  if (m_process_stop->state() != QProcess::NotRunning)
+    return;
+
+  m_process_stop->start(WAYDROID_PATH, QStringList() << "session" << "stop");
   m_status = tr("Stopping Android session");
   m_status_code = Status::StoppingSession;
   emit statusChanged();
+}
+
+bool Runner::sessionActive() const
+{
+  return m_process_session && m_process_session->state() != QProcess::NotRunning;
 }
 
 void Runner::checkStatus()
@@ -173,7 +190,7 @@ void Runner::onCheckSession()
       m_status_code = Status::WaitingForUI;
       emit statusChanged();
     }
-  else
+  else if (sessionActive())
     QTimer::singleShot(2000, this, &Runner::onCheckSession);
 }
 
@@ -214,6 +231,22 @@ void Runner::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
   emit exit();
 }
 
+void Runner::onStopFinished()
+{
+  onStdErr();
+  onStdOut();
+
+  // The end of our own session is reported by onFinished. Otherwise this
+  // was a session started elsewhere (ErrorSessionRunning): a start is
+  // possible again.
+  if (!sessionActive() && m_status_code == Status::StoppingSession)
+    {
+      m_status = tr("Android session finished");
+      m_status_code = Status::Idle;
+      emit statusChanged();
+    }
+}
+
 static void output(bool err, const char *prefix, QProcess *process)
 {
   if (!process || !process->isReadable())
@@ -235,6 +268,8 @@ void Runner::onStdErr()
     output(true, "[Session]", m_process_session);
   if (m_process_fullui)
     output(true, "[FullUI]", m_process_fullui);
+  if (m_process_stop)
+    output(true, "[Stop]", m_process_stop);
 }
 
 void Runner::onStdOut()
@@ -243,4 +278,6 @@ void Runner::onStdOut()
     output(false, "[Session]", m_process_session);
   if (m_process_fullui)
     output(false, "[FullUI]", m_process_fullui);
+  if (m_process_stop)
+    output(false, "[Stop]", m_process_stop);
 }

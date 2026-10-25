@@ -73,6 +73,9 @@ public:
   Q_INVOKABLE void start();
   Q_INVOKABLE void stopSession();
 
+  // the session process runs (starting, running or stopping Android)
+  bool sessionActive() const;
+
   bool crashed() const { return m_crashed; }
   int  exitCode() const { return m_exit_code; }
   QString status() const { return m_status; }
@@ -91,6 +94,7 @@ protected:
 protected:
   void onError(QProcess::ProcessError error);
   void onFinished(int /*exitCode*/, QProcess::ExitStatus exitStatus);
+  void onStopFinished();
   void onCheckSession();
   void onStdOut();
   void onStdErr();
@@ -98,6 +102,7 @@ protected:
 protected:
   QProcess   *m_process_session{nullptr};
   QProcess   *m_process_fullui{nullptr};
+  QProcess   *m_process_stop{nullptr};
   QString     m_wayland_socket;
 
   QString     m_status;
@@ -105,8 +110,8 @@ protected:
   bool        m_status_session_running{false};
   bool        m_status_container_running{false};
   QString     m_status_wayland_socket;
-  bool        m_crashed;
-  int         m_exit_code;
+  bool        m_crashed{false};
+  int         m_exit_code{0};
 
 };
 
