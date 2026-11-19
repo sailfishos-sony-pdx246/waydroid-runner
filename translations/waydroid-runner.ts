@@ -104,82 +104,87 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="216"/>
-        <source>Waydroid&apos;s service does not run. Restart the phone and try again.</source>
+        <location filename="../src/setup.cpp" line="217"/>
+        <source>Waydroid&apos;s service is not available.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="218"/>
+        <location filename="../src/setup.cpp" line="221"/>
+        <source>Waydroid&apos;s service did not start.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/setup.cpp" line="223"/>
         <source>Waydroid refused the download channels.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="220"/>
+        <location filename="../src/setup.cpp" line="225"/>
         <source>Waydroid could not start the setup.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="247"/>
+        <location filename="../src/setup.cpp" line="252"/>
         <source>%1 of %2 MB, %3 %4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="256"/>
+        <location filename="../src/setup.cpp" line="261"/>
         <source>Downloading Android, part 2 of 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="257"/>
+        <location filename="../src/setup.cpp" line="262"/>
         <source>Downloading Android, part 1 of 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="259"/>
+        <location filename="../src/setup.cpp" line="264"/>
         <source>Checking the download</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="261"/>
+        <location filename="../src/setup.cpp" line="266"/>
         <source>Unpacking</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="277"/>
+        <location filename="../src/setup.cpp" line="282"/>
         <source>Android is set up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="304"/>
+        <location filename="../src/setup.cpp" line="309"/>
         <source>No connection to the download server. Check the network connection and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="305"/>
+        <location filename="../src/setup.cpp" line="310"/>
         <source>The download channel offers no Android for this phone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="310"/>
+        <location filename="../src/setup.cpp" line="315"/>
         <source>The download failed. Check the network connection and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="312"/>
+        <location filename="../src/setup.cpp" line="317"/>
         <source>The download was damaged. Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="314"/>
+        <location filename="../src/setup.cpp" line="319"/>
         <source>There is not enough free space.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="316"/>
+        <location filename="../src/setup.cpp" line="321"/>
         <source>The download channel lists no Android images.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/setup.cpp" line="317"/>
+        <location filename="../src/setup.cpp" line="322"/>
         <source>Setting up Android failed.</source>
         <translation type="unfinished"></translation>
     </message>

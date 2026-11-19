@@ -211,9 +211,14 @@ void Setup::onInitReply(QDBusPendingCallWatcher *watcher)
 
   QDBusError e = reply.error();
   std::cerr << "[Setup] Init failed: " << e.name().toStdString() << ": " << e.message().toStdString() << std::endl;
-  if (e.type() == QDBusError::ServiceUnknown || e.type() == QDBusError::NoReply ||
-      e.type() == QDBusError::Timeout || e.type() == QDBusError::Disconnected)
-    setState(State::Failed, tr("Waydroid's service does not run. Restart the phone and try again."), e.message());
+  // D-Bus activation starts the service (through systemd). When its start
+  // fails, the call only times out (systemd 238 does not report it).
+  if (e.type() == QDBusError::ServiceUnknown)
+    setState(State::Failed, tr("Waydroid's service is not available."), e.message());
+  else if (e.type() == QDBusError::NoReply || e.type() == QDBusError::Timeout ||
+           e.type() == QDBusError::TimedOut || e.type() == QDBusError::Disconnected ||
+           e.name().startsWith(QLatin1String("org.freedesktop.DBus.Error.Spawn")))
+    setState(State::Failed, tr("Waydroid's service did not start."), e.message());
   else if (e.message().contains(QLatin1String("Polkit")))
     setState(State::Failed, tr("Waydroid refused the download channels."), e.message());
   else
