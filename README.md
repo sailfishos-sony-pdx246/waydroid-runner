@@ -4,6 +4,27 @@ This is a helper program for running Waydroid session on Sailfish. It
 starts a new session when launched. The runner is the Wayland compositor
 that Android draws into, so Android lives as long as the runner does.
 
+## Setting Android up
+
+If Waydroid is not set up yet (no `/var/lib/waydroid/waydroid.cfg` or
+`rootfs`, Waydroid's own test), this fork's window offers the setup
+instead of starting a session: it says what is downloaded, checks the
+free space, and runs Waydroid's own setup when the user taps *Set up
+Android*. Then it starts Android.
+
+Waydroid's root service (`waydroid container start`) runs the setup for
+any user through D-Bus: `Init(a{ss})` on `id.waydro.Initializer`, object
+`/Initializer` of `id.waydro.Container` on the system bus, with the
+signals `ProgressChanged(s)`, `Finished()` and `Interrupted()`, and
+`Cancel()`. It asks for no authorization when the channels in the call
+are those of `/usr/share/waydroid-extra/channels.cfg` (Waydroid's
+defaults if there is none), so the runner passes exactly these. A device
+package can name a channel with the images tested on that device there.
+The window shows the download's progress from `ProgressChanged`, and
+the last line of Waydroid's error after `Interrupted`. Closing the
+window during the setup lets it finish; Android starts the next time
+the window is opened.
+
 ## Background mode
 
 This fork (github.com/sailfishos-sony-pdx246/waydroid-runner) keeps
@@ -55,10 +76,10 @@ D-Bus interface on the session bus: service and interface
 |---|---|
 | `activateWindow(as)` | Launcher entry point: without arguments `Show()`, with an Android app's package first `Launch(package)` |
 | `Launch(s)` | Open the Android app with this package (once Android's UI is up) and show the window |
-| `Show()` | Show the window; start Android if it does not run |
+| `Show()` | Show the window; start Android if it does not run (the setup if Android is not set up yet) |
 | `Hide()` | Close the window, as the user would; Android keeps running unless the setting is `stop` |
 | `Stop()` | Stop the Android session |
-| `State` (s) | `stopped`, `starting`, `running`, `stopping` or `error`; signal `StateChanged(s)` |
+| `State` (s) | `setup` (Android is not set up yet), `stopped`, `starting`, `running`, `stopping` or `error`; signal `StateChanged(s)` |
 | `Open` (b) | Whether the window is open, on screen or in the app switcher; signal `OpenChanged(b)` |
 
 For example:

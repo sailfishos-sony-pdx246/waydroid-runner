@@ -45,6 +45,7 @@
 class MDConfItem;
 class QQuickView;
 class Runner;
+class Setup;
 
 // D-Bus interface of the running instance. The launchers (X-Maemo-Method:
 // the Waydroid icon and the Android apps' icons), a tap on an Android
@@ -52,7 +53,8 @@ class Runner;
 // scripts reach the instance through it.
 // Closing the window keeps Android running, unless the setting closeActionKey
 // (Settings > Apps > Waydroid) is "stop"; the instance quits once the session
-// has ended and the window is closed.
+// has ended and the window is closed. While Android is being set up (Setup),
+// closing the window lets the setup finish; the instance quits after it.
 //
 // "Open" is not QWindow's visibility: Lipstick hides the main window of an
 // application with a cover whenever it is not on screen (in the app switcher,
@@ -73,7 +75,7 @@ public:
   // unset) or "stop"
   static const QString closeActionKey;
 
-  Service(QQuickView *view, Runner *runner, QObject *parent=nullptr);
+  Service(QQuickView *view, Runner *runner, Setup *setup, QObject *parent=nullptr);
 
   QString state() const;
   bool open() const { return m_open; }
@@ -105,10 +107,13 @@ protected:
   void onSessionFinished();
   void onCloseActionChanged();
   bool stopOnClose() const;
+  void onSetupStateChanged();
+  void onSetupFinished();
 
 protected:
   QQuickView *m_view;
   Runner     *m_runner;
+  Setup      *m_setup;
   MDConfItem *m_close_action;
   QString     m_state;
   bool        m_open{false};

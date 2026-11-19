@@ -50,12 +50,20 @@ Page {
     property bool appStarted: false
     property int  nwindows: 0
     property bool settingsInitDone: false
+    // Android is not set up yet: the setup instead of the session's status
+    property bool setupShown: runner.statusCode == Runner.NotSetUp
+
+    SetupView {
+        anchors.fill: parent
+        visible: root.setupShown
+    }
 
     BusyIndicator {
         id: busyInd
         anchors.centerIn: root
         running: false
         size: BusyIndicatorSize.Large
+        visible: !root.setupShown
     }
 
     // Start and end notification
@@ -63,7 +71,7 @@ Page {
         anchors.centerIn: busyInd
         source: Qt.resolvedUrl("icons/waydroid.png")
         sourceSize.width: busyInd.width / 2
-        visible: !appStarted || appFinished
+        visible: (!appStarted || appFinished) && !root.setupShown
     }
 
     Label {
@@ -75,7 +83,7 @@ Page {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         text: runner.status
-        visible: !appStarted || appFinished
+        visible: (!appStarted || appFinished) && !root.setupShown
         width: root.width - 2*Theme.horizontalPageMargin
         wrapMode: Text.WordWrap
     }

@@ -64,6 +64,8 @@ public:
     StartingSession = 1,
     WaitingForUI= 2,
     StoppingSession = 3,
+    // Waydroid is not set up yet: the window offers the setup (Setup)
+    NotSetUp = 4,
   };
   Q_ENUM(Status);
 

@@ -37,6 +37,7 @@
 
 #include "service.h"
 #include "runner.h"
+#include "setup.h"
 
 #include <QDBusConnection>
 #include <QDBusMessage>
@@ -54,14 +55,17 @@ const QString Service::name = QStringLiteral("org.sailfishosopen.WaydroidRunner"
 const QString Service::path = QStringLiteral("/org/sailfishosopen/WaydroidRunner");
 const QString Service::closeActionKey = QStringLiteral("/apps/waydroid-runner/close_action");
 
-Service::Service(QQuickView *view, Runner *runner, QObject *parent):
+Service::Service(QQuickView *view, Runner *runner, Setup *setup, QObject *parent):
   QObject(parent),
   m_view(view),
-  m_runner(runner)
+  m_runner(runner),
+  m_setup(setup)
 {
   m_state = state();
   connect(m_runner, &Runner::statusChanged, this, &Service::onStatusChanged);
   connect(m_runner, &Runner::exit, this, &Service::onSessionFinished);
+  connect(m_setup, &Setup::stateChanged, this, &Service::onSetupStateChanged);
+  connect(m_setup, &Setup::finished, this, &Service::onSetupFinished);
   m_view->installEventFilter(this);
 
   m_close_action = new MDConfItem(closeActionKey, this);
@@ -80,6 +84,8 @@ QString Service::state() const
       return QStringLiteral("running");
     case Runner::Status::StoppingSession:
       return QStringLiteral("stopping");
+    case Runner::Status::NotSetUp:
+      return QStringLiteral("setup");
     default:
       return QStringLiteral("error");
     }
@@ -157,9 +163,13 @@ bool Service::eventFilter(QObject *object, QEvent *event)
       m_open = false;
       emit OpenChanged(m_open);
 
-      // Closed while Android does not run: nothing to keep
+      // Closed while Android does not run: nothing to keep, unless Android
+      // is being set up (onSetupStateChanged, onSetupFinished)
       if (!m_runner->sessionActive())
-        qApp->quit();
+        {
+          if (m_setup->state() != Setup::State::Running)
+            qApp->quit();
+        }
       else if (stopOnClose())
         m_runner->stopSession();
     }
@@ -176,6 +186,24 @@ void Service::onSessionFinished()
 bool Service::stopOnClose() const
 {
   return m_close_action->value().toString() == QLatin1String("stop");
+}
+
+void Service::onSetupStateChanged()
+{
+  // Failed or cancelled with the window closed: nothing left to do
+  Setup::State s = m_setup->state();
+  if (s != Setup::State::Running && s != Setup::State::Done && !m_open && !m_runner->sessionActive())
+    qApp->quit();
+}
+
+void Service::onSetupFinished()
+{
+  // Android is set up. Closed during the setup: start Android when the window
+  // is opened again (Show) and quit until then.
+  if (m_open)
+    m_runner->start();
+  else if (!m_runner->sessionActive())
+    qApp->quit();
 }
 
 void Service::onCloseActionChanged()

@@ -52,6 +52,7 @@
 #include "qmlcompositor.h"
 #include "runner.h"
 #include "service.h"
+#include "setup.h"
 
 QString getFreeWaylandSocket()
 {
@@ -88,6 +89,7 @@ int main(int argc, char *argv[])
     app->setQuitOnLastWindowClosed(false);
 
     qmlRegisterUncreatableType<Runner>("org.sailfishosopen", 1, 0, "Runner", "Register for enum types");
+    qmlRegisterUncreatableType<Setup>("org.sailfishosopen", 1, 0, "Setup", "Register for enum types");
 
     QQuickView *view = SailfishApp::createView();
 
@@ -108,12 +110,17 @@ int main(int argc, char *argv[])
     Runner *runner = new Runner(socket, app);
     view->rootContext()->setContextProperty("runner", runner);
 
+    // first start: Android's setup (the window shows it while the runner's
+    // status is NotSetUp)
+    Setup *setup = new Setup(app);
+    view->rootContext()->setContextProperty("setup", setup);
+
     // whether settings are allowed and misc variables
     view->rootContext()->setContextProperty("programVersion", APP_VERSION);
 
     // D-Bus interface: the object first, so that a call queued for the name
     // (D-Bus activation) finds it
-    Service *service = new Service(view, runner, app);
+    Service *service = new Service(view, runner, setup, app);
     if (!bus.registerObject(Service::path, service, QDBusConnection::ExportScriptableContents) ||
         !bus.registerService(Service::name))
       {

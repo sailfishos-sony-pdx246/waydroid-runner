@@ -36,6 +36,7 @@
 ****************************************************************************/
 
 #include "runner.h"
+#include "setup.h"
 
 #include <QProcessEnvironment>
 #include <QSettings>
@@ -120,6 +121,16 @@ void Runner::start()
     {
       m_status = tr("Session process not available, cannot start");
       m_status_code = Status::ErrorSessionNotAvailable;
+      emit statusChanged();
+      return;
+    }
+
+  // Without Android's images a session cannot start: the window offers the
+  // setup first, which calls start() again when it is done
+  if (!Setup::initialized())
+    {
+      m_status = tr("Android is not set up yet");
+      m_status_code = Status::NotSetUp;
       emit statusChanged();
       return;
     }

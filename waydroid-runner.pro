@@ -41,12 +41,14 @@ SOURCES += \
     src/main.cpp \
     src/qmlcompositor.cpp \
     src/runner.cpp \
-    src/service.cpp
+    src/service.cpp \
+    src/setup.cpp
 
 OTHER_FILES += \
     qml/main.qml \
     qml/MainPage.qml \
     qml/CoverPage.qml \
+    qml/SetupView.qml \
     qml/WindowContainer.qml \
     settings/$${TARGET}.json \
     settings/WaydroidSettings.qml \
@@ -57,7 +59,8 @@ DISTFILES += \
 HEADERS += \
     src/qmlcompositor.h \
     src/runner.h \
-    src/service.h
+    src/service.h \
+    src/setup.h
 
 icons.files = icons
 icons.path = $$PREFIX/share/$${TARGET}

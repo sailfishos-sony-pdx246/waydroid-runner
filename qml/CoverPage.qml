@@ -66,7 +66,12 @@ CoverBackground {
         maximumLineCount: 3
         truncationMode: TruncationMode.Fade
         font.pixelSize: Theme.fontSizeSmall
-        text: runner.statusCode == Runner.WaitingForUI ? qsTr("Android is running") : runner.status
+        text: runner.statusCode == Runner.WaitingForUI
+              ? qsTr("Android is running")
+              : (runner.statusCode == Runner.NotSetUp && setup.state == Setup.Running
+                 ? (setup.progress < 0 ? qsTr("Setting up Android")
+                                       : qsTr("Setting up Android, %1 %").arg(Math.round(100 * setup.progress)))
+                 : runner.status)
     }
 
     CoverActionList {
