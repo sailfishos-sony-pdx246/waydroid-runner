@@ -5,7 +5,7 @@ Name:       waydroid-runner
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    Waydroid session wrapper
-Version:    0.6.0
+Version:    0.7.0
 Release:    1
 Group:      Qt/Qt
 License:    BSD-3
@@ -32,6 +32,8 @@ Wrapper for running Waydroid session on Sailfish. Closing its window
 keeps Android running in the background; the launcher shows it again.
 Android apps' launchers and notification taps open them in its window.
 Settings > Apps > Waydroid sets whether closing the window stops Android.
+At the first start it sets Android up through Waydroid's own setup, which
+downloads the images of /usr/share/waydroid-extra/channels.cfg's channels.
 
 PackageName: Waydroid Runner
 Type: desktop-application
