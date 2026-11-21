@@ -54,9 +54,12 @@ OTHER_FILES += \
     settings/WaydroidSettings.qml \
 
 DISTFILES += \
-    rpm/waydroid-runner.spec
+    rpm/waydroid-runner.spec \
+    plugin/plugin.pro \
+    plugin/qmldir
 
 HEADERS += \
+    src/androidstate.h \
     src/qmlcompositor.h \
     src/runner.h \
     src/service.h \

@@ -36,6 +36,7 @@
 ****************************************************************************/
 
 #include "setup.h"
+#include "androidstate.h"
 
 #include <QDBusConnection>
 #include <QDBusError>
@@ -65,7 +66,7 @@ const QString interface = QStringLiteral("id.waydro.Initializer");
 
 // Waydroid's work directory and the channels it downloads from by default
 // (tools/config/__init__.py)
-const QString work = QStringLiteral("/var/lib/waydroid");
+const QString work = AndroidState::workDir();
 const QString channelsConfig = QStringLiteral("/usr/share/waydroid-extra/channels.cfg");
 
 // About 1 GB of zips; the system image unpacks to about 2 GB while its zip
@@ -123,8 +124,7 @@ Setup::Setup(QObject *parent):
 
 bool Setup::initialized()
 {
-  return QFileInfo(work + QStringLiteral("/waydroid.cfg")).isFile() &&
-      QFileInfo(work + QStringLiteral("/rootfs")).isDir();
+  return AndroidState::isSetUp();
 }
 
 qint64 Setup::bytesNeeded() const

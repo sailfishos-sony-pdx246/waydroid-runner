@@ -8,6 +8,8 @@ Makefile
 .qmake.stash
 *.o
 moc_*.cpp
+*.moc
+*.so
 *.qm
 documentation.list
 /waydroid-runner
